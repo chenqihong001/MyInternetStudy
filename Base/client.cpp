@@ -1,44 +1,50 @@
-#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
-#include <iostream>
-#include <string.h>
-void error_handling(const char *error);
+void error_handling(const char *message);
+
 int main(int argc, char *argv[])
 {
-    int server_sock;
-    int client_sock;
-    struct sockaddr_in server_addr
+    int sock;
+    struct sockaddr_in serv_addr; // 以sockaddr_in 声明服务端地址(ip,port)，后面强制转为sockaddr
+    char message[30];
+    int str_len;
+
+    if (argc != 3)
     {
-        0
-    }; // 声明两个地址
-    struct sockaddr_in client_addr
-    {
-        0
-    };                                //
-    char message[] = "Hello, world!"; // 要发送的信息
-    if (argc != 2)
-    {
-        std::cerr << "Usage: " << argv[0] << std::endl;
+        printf("usage: %s <IP> <port>\n", argv[0]);
         exit(1);
     }
-    server_sock = socket(PF_INET, SOCK_STREAM, 0); // 返回文件描述符
-    if (server_sock == -1)
+
+    sock = socket(PF_INET, SOCK_STREAM, 0);
+    if (sock == -1)
+        error_handling("socket() error");
+
+    memset(&serv_addr, 0, sizeof(serv_addr));
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_addr.s_addr = inet_addr(argv[1]); // 客户端，inet_addr(ip地址)把字符串的ip地址转化为2进制;
+    serv_addr.sin_port = htons(atoi(argv[2]));      // host to internet short 将字节序整数转为网络字节序
+    // atoi->ASCII to Integer
+    if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) == -1)
+        error_handling("connect() error!");
+
+    str_len = read(sock, message, sizeof(message) - 1);
+    if (str_len == -1)
     {
-        error_handling("server套接字创建失败");
+        error_handling("read() error!");
     }
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    server_addr.sin_port = htons(atoi(argv[0]));
-    if (bind(server_sock, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1)
-        error_handling("bind Error");
-    if (listen(server_sock, 5) == -1)
-        error_handling("listen Error");
-    client_addr
+
+    printf("Message from server : %s\n", message);
+    close(sock);
+    return 0;
 }
+
 void error_handling(const char *message)
 {
-    std::cerr << message << "\n";
+    fputs(message, stderr);
+    fputc('\n', stderr);
+    exit(1);
 }
