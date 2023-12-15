@@ -5,7 +5,6 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 void error_handling(const char *message);
-
 int main(int argc, char *argv[])
 {
     int serv_sock;
@@ -15,7 +14,7 @@ int main(int argc, char *argv[])
     struct sockaddr_in clnt_addr;
     socklen_t clnt_addr_size;
 
-    char message[] = "Hello World!";
+    char message[] = "123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLM";
 
     if (argc != 2)
     {

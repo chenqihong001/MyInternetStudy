@@ -4,13 +4,14 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <iostream>
 void error_handling(const char *message);
-
+typedef struct sockaddr_in SOCKADDR_IN;
 int main(int argc, char *argv[])
 {
     int sock;
-    struct sockaddr_in serv_addr; // 以sockaddr_in 声明服务端地址(ip,port)，后面强制转为sockaddr
-    char message[30];
+    SOCKADDR_IN serv_addr; // 以sockaddr_in 声明服务端地址(ip,port)，后面强制转为sockaddr
+
     int str_len;
 
     if (argc != 3)
@@ -30,14 +31,19 @@ int main(int argc, char *argv[])
     // atoi->ASCII to Integer
     if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) == -1)
         error_handling("connect() error!");
-
-    str_len = read(sock, message, sizeof(message) - 1);
+    char message[30];
+    char mess[30];
+    str_len = read(sock, message, 9);
+    int messLength = read(sock, mess, 10);
+    // 多次调用read函数->不同于server端的write次数->体现了传输数据不存在边界性
     if (str_len == -1)
     {
         error_handling("read() error!");
     }
-
-    printf("Message from server : %s\n", message);
+    message[str_len] = '\0';
+    mess[messLength] = '\0';
+    std::cout << message << std::endl;
+    std::cout << mess << std::endl;
     close(sock);
     return 0;
 }
