@@ -1,21 +1,49 @@
-#include <stdio.h>
-#include <arpa/inet.h>
+#include <iostream>
+#include <vector>
+#include <fstream>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/serialization/vector.hpp>
 
-int main(int argc, char *args[])
+// 序列化向量
+template <typename T>
+void SerializeVector(const std::vector<T> &vec, const std::string &filename)
 {
-    char *addr1 = "1.2.3.4";
-    char *addr2 = "1.2.3.256"; // 1个字节能表示的最大整数为255，也就是说，它是错误的IP地址。利用该错误地址验证inet_addr哈桑农户的错误检测能力。
+    std::ofstream ofs(filename, std::ios::binary);
+    boost::archive::binary_oarchive ar(ofs);
+    ar << vec;
+}
 
-    unsigned long conv_addr = inet_addr(addr1); // 正常调用
-    if (conv_addr == INADDR_NONE)
-        printf("Error occured!\n");
-    else
-        printf("Network ordered integer addr: %#lx \n", conv_addr);
+// 反序列化向量
+template <typename T>
+void DeserializeVector(std::vector<T> &vec, const std::string &filename)
+{
+    std::ifstream ifs(filename, std::ios::binary);
+    boost::archive::binary_iarchive ar(ifs);
+    ar >> vec;
+}
 
-    conv_addr = inet_addr(addr2); // 调用出现异常。
-    if (conv_addr == INADDR_NONE)
-        printf("Error occureded \n");
-    else
-        printf("Network ordered integer addr: %#lx \n\n", conv_addr);
+int main()
+{
+    // 创建一个 std::vector
+    std::vector<int> originalVector = {1, 2, 3, 4, 5};
+
+    // 序列化向量到文件
+    SerializeVector(originalVector, "serialized_vector.dat");
+
+    // 清空向量，模拟重新加载
+    originalVector.clear();
+
+    // 反序列化向量
+    DeserializeVector(originalVector, "serialized_vector.dat");
+
+    // 输出还原后的向量
+    std::cout << "Deserialized Vector: ";
+    for (const auto &elem : originalVector)
+    {
+        std::cout << elem << " ";
+    }
+    std::cout << std::endl;
+
     return 0;
 }

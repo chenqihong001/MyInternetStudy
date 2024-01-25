@@ -10,7 +10,8 @@
                 "${file}",
                 "-o",
                 "${fileDirname}/../build/${fileBasenameNoExtension}",
-                "-std=c++17"
+                "-std=c++17",
+                "-pthread"
             ],
             "options": {
                 "cwd": "${fileDirname}"
