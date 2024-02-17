@@ -11,7 +11,10 @@
                 "-o",
                 "${fileDirname}/../build/${fileBasenameNoExtension}",
                 "-std=c++17",
-                "-pthread"
+                "-pthread",
+                "-lboost_thread",
+                "-lmuduo_net",
+                "-lmuduo_base"
             ],
             "options": {
                 "cwd": "${fileDirname}"
